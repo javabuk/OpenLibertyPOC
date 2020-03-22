@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>POCOpenLiberty</artifactId>
+        <groupId>org.openliberty.poc</groupId>
+        <version>1.0</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>org.indicepeticiones.ws</groupId>
+    <artifactId>IndicePeticionesWS</artifactId>
+    <packaging>war</packaging>
+
+    <dependencies>
+        <!-- Dependencias para desplegar un servicio web SOAP -->
+        <dependency>
+            <groupId>org.jboss.ws</groupId>
+            <artifactId>jbossws-api</artifactId>
+            <version>1.0.2.Final</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.cxf</groupId>
+            <artifactId>cxf-bundle</artifactId>
+            <version>2.6.10</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>javax</groupId>
+            <artifactId>javaee-api</artifactId>
+            <version>6.0</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- Log4j -->
+        <dependency>
+            <groupId>log4j</groupId>
+            <artifactId>log4j</artifactId>
+            <version>1.2.17</version>
+        </dependency>
+
+        <dependency>
+            <groupId>log4j</groupId>
+            <artifactId>apache-log4j-extras</artifactId>
+            <version>1.2.17</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <finalName>${project.artifactId}</finalName>
+        <plugins>
+            <!-- Enable liberty-maven plugin -->
+            <plugin>
+                <groupId>io.openliberty.tools</groupId>
+                <artifactId>liberty-maven-plugin</artifactId>
+                <version>${version.liberty-maven-plugin}</version>
+                <configuration>
+                    <serverName>sampleAppServer</serverName>
+                </configuration>
+            </plugin>
+            <!-- Plugin to run functional tests -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <version>${version.maven-failsafe-plugin}</version>
+                <configuration>
+                    <systemPropertyVariables>
+                        <http.port>${liberty.var.default.http.port}</http.port>
+                        <https.port>${liberty.var.default.https.port}</https.port>
+                        <app.context.root>${liberty.var.app.context.root}</app.context.root>
+                    </systemPropertyVariables>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-war-plugin</artifactId>
+                <configuration>
+                    <webResources>
+                        <resource>
+                            <directory>${basedir}/src/main/resources</directory>
+                            <filtering>true</filtering>
+                            <targetPath>WEB-INF</targetPath>
+                        </resource>
+                    </webResources>
+                    <!-- Elegir el web.xml correspondiente al servidor -->
+                    <webXml>src/main/resources/web.xml</webXml>
+                    <!-- Excluir librerias HAPI -->
+                    <packagingExcludes>
+                        WEB-INF/lib/hapi-base-2.1.jar,
+                        WEB-INF/lib/hapi-structures-v21-2.1.jar,
+                        WEB-INF/lib/hapi-structures-v22-2.1.jar,
+                        WEB-INF/lib/hapi-structures-v23-2.1.jar,
+                        WEB-INF/lib/hapi-structures-v231-2.1.jar,
+                        WEB-INF/lib/hapi-structures-v24-2.1.jar,
+                        WEB-INF/lib/hapi-structures-v25-2.1.jar,
+                        WEB-INF/lib/hapi-structures-v251-2.1.jar,
+                        WEB-INF/lib/hapi-structures-v26-2.1.jar,
+                        WEB-INF/lib/commonj.sdo-2.1.1.jar,
+                        WEB-INF/lib/eclipselink-2.5.0.jar,
+                        WEB-INF/lib/javax.persistence-2.0.0.jar,
+                        WEB-INF/lib/jaxp-api-1.4.5.jar,
+                        WEB-INF/lib/jaxp-ri-1.4.5.jar,
+                        WEB-INF/lib/jsf-api-2.1.7.jar,
+                        WEB-INF/lib/jsf-impl-2.1.7.jar,
+                        WEB-INF/lib/jsp-api-2.1.jar,
+                        WEB-INF/lib/jstl-1.2.jar,
+                        WEB-INF/lib/log4j-1.2.17.jar,
+                        WEB-INF/lib/apache-log4j-extras-1.2.17.jar,
+                        WEB-INF/lib/servlet-api-2.5.jar,
+                        WEB-INF/lib/slf4j-api-1.7.5.jar,
+                        WEB-INF/lib/axis.jar,
+                        WEB-INF/lib/commons-discovery-0.2.jar,
+                        WEB-INF/lib/commons-logging.jar,
+                        WEB-INF/lib/jaxrpc.jar,
+                        WEB-INF/lib/saaj.jar,
+                        WEB-INF/lib/wsdl4j.jar,
+                        WEB-INF/classes/*.jks,
+                        WEB-INF/classes/*.properties,
+                        WEB-INF/jaxws-endpoint-config.xml,
+                        WEB-INF/wsdl,
+                        WEB-INF/classes/org/indicepeticiones/ws/handler/**,
+                        WEB-INF/classes/org/indicepeticiones/ws/sec/**,
+                        WEB-INF/classes/ibm-web-bnd.xml,
+                        WEB-INF/classes/ibm-web-ext.xml
+                    </packagingExcludes>
+                    <warSourceExcludes>
+                        WEB-INF/wsdl/**
+                    </warSourceExcludes>
+                    <archive>
+                        <!-- Necesaria la dependencia org.apache.ws.security en el MANIFEST.MF
+                            para jboss AS 7, además en org.indicepeticiones.config están fichero de configuración
+                            y jks -->
+                        <manifestEntries>
+                            <Dependencies>org.apache.ws.security, org.indicepeticiones.config</Dependencies>
+                        </manifestEntries>
+                    </archive>
+                    <!-- <packagingExcludes>WEB-INF/classes/*.jks, WEB-INF/classes/*.properties</packagingExcludes> -->
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>
